@@ -5,8 +5,10 @@ use lazy_static::lazy_static;
 lazy_static! {
     pub static ref HOST: String = set_host();
     pub static ref PORT: u16 = set_port();
+    pub static ref DATABASE_URL: String = set_db();
 }
 
+/// get_env: get `value` for a `key` from `.env`
 fn get_env(key: &str) -> Result<String, VarError> {
     dotenv::dotenv().ok();
     env::var(key)
@@ -25,4 +27,12 @@ pub fn get_address() -> (String, u16) {
     let port = (*PORT).clone();
 
     (host, port)
+}
+
+fn set_db() -> String {
+    get_env("DATABASE_URL").unwrap()
+}
+
+pub fn get_db() -> String {
+    (*DATABASE_URL).clone()
 }
