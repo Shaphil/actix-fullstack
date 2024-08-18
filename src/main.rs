@@ -1,15 +1,10 @@
 mod utils;
+mod home;
 
 use actix_web::middleware::Logger;
-use actix_web::{get, web, App, HttpServer, Responder};
-use utils::log::set_logger;
+use actix_web::{App, HttpServer};
 use utils::config::get_address;
-
-
-#[get("/hello/{name}")]
-async fn greet(name: web::Path<String>) -> impl Responder {
-    format!("Hello {name}!")
-}
+use utils::log::set_logger;
 
 fn init() {
     set_logger();
@@ -21,11 +16,12 @@ fn init() {
 async fn main() -> std::io::Result<()> {
     init();
     let (host, port) = get_address();
+    println!("Server running at http://{}:{}", host, port);
 
     HttpServer::new(|| {
         App::new()
             .wrap(Logger::default())
-            .service(greet)
+            .configure(home::urls::routes)
     })
         .bind((host, port))?
         .run()
