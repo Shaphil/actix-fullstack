@@ -1,5 +1,6 @@
-use actix_web::web;
 use crate::home::handlers;
+
+use actix_web::web;
 
 pub fn routes(config: &mut web::ServiceConfig) {
     config
