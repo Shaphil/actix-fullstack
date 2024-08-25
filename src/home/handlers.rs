@@ -1,10 +1,10 @@
-use actix_web::web::Json;
-use actix_web::{get, web, Error, Responder};
-use sea_orm::DatabaseBackend::Postgres;
-use sea_orm::{ConnectionTrait, Statement};
-
-use crate::home::models::HomeResponse;
+use crate::home::models::{HomeResponse, User};
 use crate::utils::app_state::AppState;
+use actix_web::web::Json;
+use actix_web::{get, post, web, Error, HttpResponse, Responder};
+use entity::user::{ActiveModel, Model};
+use sea_orm::DatabaseBackend::Postgres;
+use sea_orm::{ActiveModelTrait, ActiveValue, ConnectionTrait, Statement};
 
 #[get("/hello/{name}")]
 pub async fn greet(name: web::Path<String>) -> Result<impl Responder, Error> {
@@ -27,4 +27,24 @@ pub async fn test(app_state: web::Data<AppState>) -> Result<impl Responder, Erro
     };
 
     Ok(Json(response))
+}
+
+#[post("/create-user")]
+pub async fn create_user(payload: Json<User>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
+    let user = ActiveModel {
+        user_name: ActiveValue::Set(payload.user_name.clone()),
+        first_name: ActiveValue::Set(Option::from(payload.first_name.clone())),
+        last_name: ActiveValue::Set(Option::from(payload.last_name.clone())),
+        email: ActiveValue::Set(payload.email.clone()),
+        is_active: ActiveValue::Set(payload.is_active.clone()),
+        last_login: ActiveValue::Set(payload.last_login.clone()),
+        date_joined: ActiveValue::Set(payload.date_joined.clone()),
+        password: ActiveValue::Set(payload.password.clone()),
+        ..Default::default()
+    };
+
+    let user: Model = user.insert(&app_state.db).await.unwrap();
+
+    // Ok(Json(user))
+    Ok(HttpResponse::Ok().json(user))
 }

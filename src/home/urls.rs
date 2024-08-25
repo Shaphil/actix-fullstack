@@ -8,5 +8,6 @@ pub fn routes(config: &mut web::ServiceConfig) {
             web::scope("/home")
                 .service(handlers::greet)
                 .service(handlers::test)
+                .service(handlers::create_user)
         );
 }
