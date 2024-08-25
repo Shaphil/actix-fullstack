@@ -17,6 +17,7 @@ pub struct Model {
     pub is_active: Option<bool>,
     pub last_login: Option<DateTime>,
     pub date_joined: Option<DateTime>,
+    pub password: String,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
