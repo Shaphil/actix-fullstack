@@ -13,12 +13,17 @@ impl MigrationTrait for Migration {
                     .if_not_exists()
                     .col(ColumnDef::new(User::Id).integer().not_null().auto_increment().primary_key())
                     .col(ColumnDef::new(User::UserName).string().not_null().unique_key())
-                    .col(ColumnDef::new(User::FirstName).string())
-                    .col(ColumnDef::new(User::LastName).string())
-                    .col(ColumnDef::new(User::Email).string().unique_key().not_null())
-                    .col(ColumnDef::new(User::IsActive).boolean())
-                    .col(ColumnDef::new(User::LastLogin).date_time())
-                    .col(ColumnDef::new(User::DateJoined).date_time())
+                    .col(ColumnDef::new(User::FirstName).string().null())
+                    .col(ColumnDef::new(User::LastName).string().null())
+                    .col(
+                        ColumnDef::new(User::Email)
+                            .string()
+                            .unique_key()
+                            .not_null()
+                    )
+                    .col(ColumnDef::new(User::IsActive).boolean().not_null())
+                    .col(ColumnDef::new(User::LastLogin).date_time().null())
+                    .col(ColumnDef::new(User::DateJoined).date_time().null())
                     .to_owned(),
             )
             .await
