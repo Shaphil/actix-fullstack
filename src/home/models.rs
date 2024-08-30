@@ -13,7 +13,5 @@ pub struct UserRequest {
     pub last_name: Option<String>,
     pub email: String,
     pub is_active: Option<bool>,
-    pub last_login: String,
-    pub date_joined: String,
     pub password: String,
 }
