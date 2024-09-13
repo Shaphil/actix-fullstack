@@ -1,12 +1,14 @@
-mod utils;
 mod home;
+mod users;
+mod utils;
 
-use crate::utils::app_state::AppState;
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
 use migration::{Migrator, MigratorTrait};
 use utils::config::{get_address, get_db_connection};
 use utils::log::set_logger;
+
+use crate::utils::app_state::AppState;
 
 fn init() {
     set_logger();
@@ -28,6 +30,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(AppState { db: db.clone() }))
             .wrap(Logger::default())
             .configure(home::urls::routes)
+            .configure(users::urls::routes)
     })
         .bind((host, port))?
         .run()
