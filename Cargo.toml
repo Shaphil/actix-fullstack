@@ -10,6 +10,7 @@ members = [".", "entity", "migration"]
 actix-web = "4.9.0"
 chrono = { version = "0.4.38", features = ["serde"] }
 dotenv = "0.15.0"
+entity = { path = "entity" }
 env_logger = "0.11.5"
 lazy_static = "1.5.0"
 log = "0.4.22"
