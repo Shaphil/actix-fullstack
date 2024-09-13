@@ -9,7 +9,6 @@ use utils::log::set_logger;
 fn init() {
     set_logger();
     dotenv::dotenv().ok();
-    env_logger::init();
 }
 
 #[actix_web::main] // or #[tokio::main]
