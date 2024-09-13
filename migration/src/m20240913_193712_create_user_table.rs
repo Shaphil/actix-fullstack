@@ -16,6 +16,7 @@ impl MigrationTrait for Migration {
                     .col(ColumnDef::new(User::Firstname).string())
                     .col(ColumnDef::new(User::Lastname).string())
                     .col(ColumnDef::new(User::Email).string().unique_key().not_null())
+                    .col(ColumnDef::new(User::Password).string().not_null())
                     .col(ColumnDef::new(User::IsActive).boolean().default(false))
                     .col(ColumnDef::new(User::LastLogin).date_time())
                     .col(ColumnDef::new(User::DateJoined).date_time())
@@ -41,6 +42,7 @@ enum User {
     Firstname,
     Lastname,
     Email,
+    Password,
     IsActive,
     LastLogin,
     DateJoined,
