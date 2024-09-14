@@ -1,5 +1,11 @@
 use serde::{Deserialize, Serialize};
 
+
+#[derive(Serialize)]
+pub struct ApiResponse {
+    pub message: String,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserRequest {
     pub username: String,
