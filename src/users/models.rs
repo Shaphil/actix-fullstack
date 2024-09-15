@@ -1,3 +1,4 @@
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
 
@@ -14,8 +15,8 @@ pub struct UserRequest {
     pub email: String,
     pub password: String,
     pub is_active: Option<bool>,
-    pub last_login: Option<String>,
-    pub date_joined: Option<String>,
-    pub created_at: Option<String>,
-    pub updated_at: Option<String>,
+    pub last_login: Option<NaiveDateTime>,
+    pub date_joined: Option<NaiveDateTime>,
+    pub created_at: Option<NaiveDateTime>,
+    pub updated_at: Option<NaiveDateTime>,
 }
