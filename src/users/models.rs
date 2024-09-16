@@ -19,4 +19,6 @@ pub struct UserRequest {
     pub date_joined: Option<NaiveDateTime>,
     pub created_at: Option<NaiveDateTime>,
     pub updated_at: Option<NaiveDateTime>,
+    pub is_admin: Option<bool>,
+    pub is_superadmin: Option<bool>,
 }

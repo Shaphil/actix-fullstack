@@ -20,6 +20,8 @@ pub struct Model {
     pub date_joined: Option<DateTime>,
     pub created_at: Option<DateTime>,
     pub updated_at: Option<DateTime>,
+    pub is_admin: Option<bool>,
+    pub is_superadmin: Option<bool>,
 }
 
 #[derive(Copy, Clone, Debug, EnumIter, DeriveRelation)]
