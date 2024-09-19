@@ -1,6 +1,7 @@
 use actix_web::web::Json;
-use actix_web::{post, web, Error, HttpResponse, Responder};
-use sea_orm::ActiveModelTrait;
+use actix_web::{get, post, web, Error, HttpResponse, Responder};
+use entity::user::Entity as User;
+use sea_orm::{ActiveModelTrait, EntityTrait};
 
 use crate::users::models::{ApiResponse, UserRequest};
 use crate::users::serializers::UserSerializer;
@@ -15,6 +16,18 @@ pub async fn create_user(payload: Json<UserRequest>, app_state: web::Data<AppSta
     let result = user.insert(&app_state.db).await;
     match result {
         Ok(user) => Ok(HttpResponse::Ok().json(user)),
+        Err(err) => {
+            let response = ApiResponse { message: err.to_string() };
+            Ok(HttpResponse::BadRequest().json(response))
+        }
+    }
+}
+
+#[get("")]
+pub async fn get_users(app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
+    let result = User::find().all(&app_state.db).await;
+    match result {
+        Ok(users) => Ok(HttpResponse::Ok().json(users)),
         Err(err) => {
             let response = ApiResponse { message: err.to_string() };
             Ok(HttpResponse::BadRequest().json(response))
