@@ -35,21 +35,21 @@ impl UserSerializer {
     fn is_active(&self) -> bool {
         match self.data.is_active {
             None => false,
-            Some(_) => true
+            Some(val) => { if val == true { true } else { false } }
         }
     }
 
     fn is_admin(&self) -> bool {
         match self.data.is_admin {
             None => false,
-            Some(_) => true
+            Some(val) => { if val == true { true } else { false } }
         }
     }
 
     fn is_superadmin(&self) -> bool {
         match self.data.is_admin {
             None => false,
-            Some(_) => true
+            Some(val) => { if val == true { true } else { false } }
         }
     }
 }
