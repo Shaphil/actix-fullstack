@@ -1,6 +1,6 @@
 use crate::users::models::UserRequest;
 use actix_web::web::Json;
-use entity::user::ActiveModel;
+use entity::user::ActiveModel as User;
 use sea_orm::ActiveValue;
 
 pub struct UserSerializer {
@@ -8,12 +8,12 @@ pub struct UserSerializer {
 }
 
 impl UserSerializer {
-    pub fn serialize(&self) -> ActiveModel {
+    pub fn serialize(&self) -> User {
         let is_active = self.is_active();
         let is_admin = self.is_admin();
         let is_superadmin = self.is_superadmin();
 
-        let user = ActiveModel {
+        let user = User {
             username: ActiveValue::Set(self.data.username.clone()),
             firstname: ActiveValue::Set(self.data.firstname.clone()),
             lastname: ActiveValue::Set(self.data.lastname.clone()),
