@@ -5,5 +5,6 @@ pub fn routes(config: &mut web::ServiceConfig) {
     config.service(
         web::scope("/users")
             .service(handlers::create_user)
+            .service(handlers::get_users)
     );
 }
