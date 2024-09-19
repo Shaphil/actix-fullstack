@@ -7,5 +7,6 @@ pub fn routes(config: &mut web::ServiceConfig) {
             .service(handlers::create_user)
             .service(handlers::get_users)
             .service(handlers::get_user)
+            .service(handlers::update_user)
     );
 }
