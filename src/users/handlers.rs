@@ -34,3 +34,28 @@ pub async fn get_users(app_state: web::Data<AppState>) -> Result<impl Responder,
         }
     }
 }
+
+#[get("/{id}")]
+pub async fn get_user(id: web::Path<i32>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
+    let user_id = id.into_inner();
+    let result = User::find_by_id(user_id.clone())
+        .one(&app_state.db)
+        .await;
+
+    match result {
+        Ok(model) => {
+            match model {
+                None => {
+                    let message = format!("User with ID `{}`, does not exist", user_id);
+                    let response = ApiResponse { message };
+                    Ok(HttpResponse::NotFound().json(response))
+                }
+                Some(user) => Ok(HttpResponse::Ok().json(user))
+            }
+        }
+        Err(err) => {
+            let response = ApiResponse { message: err.to_string() };
+            Ok(HttpResponse::BadRequest().json(response))
+        }
+    }
+}
