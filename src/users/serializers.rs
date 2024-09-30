@@ -17,7 +17,7 @@ impl UserSerializer {
             username: ActiveValue::Set(self.data.username.clone()),
             firstname: ActiveValue::Set(self.data.firstname.clone()),
             lastname: ActiveValue::Set(self.data.lastname.clone()),
-            email: ActiveValue::Set(String::from(self.data.email.clone())),
+            email: ActiveValue::Set(self.data.email.clone()),
             password: ActiveValue::Set(self.data.password.clone()),
             is_active: ActiveValue::Set(Option::from(is_active)),
             last_login: ActiveValue::Set(Option::from(self.data.last_login)),
