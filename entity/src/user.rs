@@ -9,12 +9,12 @@ pub struct Model {
     #[sea_orm(primary_key)]
     pub id: i32,
     #[sea_orm(unique)]
-    pub username: String,
+    pub username: Option<String>,
     pub firstname: Option<String>,
     pub lastname: Option<String>,
     #[sea_orm(unique)]
-    pub email: String,
-    pub password: String,
+    pub email: Option<String>,
+    pub password: Option<String>,
     pub is_active: Option<bool>,
     pub last_login: Option<DateTime>,
     pub date_joined: Option<DateTime>,

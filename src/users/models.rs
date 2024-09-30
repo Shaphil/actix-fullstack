@@ -9,11 +9,11 @@ pub struct ApiResponse {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserRequest {
-    pub username: String,
+    pub username: Option<String>,
     pub firstname: Option<String>,
     pub lastname: Option<String>,
-    pub email: String,
-    pub password: String,
+    pub email: Option<String>,
+    pub password: Option<String>,
     pub is_active: Option<bool>,
     pub last_login: Option<NaiveDateTime>,
     pub date_joined: Option<NaiveDateTime>,
