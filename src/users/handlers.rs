@@ -1,12 +1,11 @@
-use actix_web::web::Json;
-use actix_web::{get, patch, post, web, Error, HttpResponse, Responder};
-use entity::user::Entity as User;
-use sea_orm::{ActiveModelTrait, EntityTrait};
-
 use crate::users::models::{ApiResponse, UserRequest};
 use crate::users::serializers::UserSerializer;
 use crate::utils::app_state::AppState;
-
+use actix_web::web::Json;
+use actix_web::{get, patch, post, web, Error, HttpResponse, Responder};
+use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use entity::user::Entity as User;
+use sea_orm::{ActiveModelTrait, EntityTrait};
 
 #[post("/create")]
 pub async fn create_user(payload: Json<UserRequest>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
@@ -64,8 +63,6 @@ pub async fn get_user(id: web::Path<i32>, app_state: web::Data<AppState>) -> Res
 pub async fn update_user(id: web::Path<i32>, payload: Json<UserRequest>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
     let user_id = id.into_inner();
     let result = User::find_by_id(user_id.clone()).one(&app_state.db).await;
-    let serializer = UserSerializer { data: payload };
-    let updated_user = serializer.serialize();
 
     match result {
         Ok(model) => {
@@ -76,14 +73,20 @@ pub async fn update_user(id: web::Path<i32>, payload: Json<UserRequest>, app_sta
                     Ok(HttpResponse::NotFound().json(response))
                 }
                 Some(mut user) => {
-                    user.username = updated_user.username.unwrap();
-                    user.firstname = updated_user.firstname.unwrap();
-                    user.lastname = updated_user.lastname.unwrap();
-                    user.email = updated_user.email.unwrap();
-                    user.password = updated_user.password.unwrap();
-                    user.is_active = updated_user.is_active.unwrap();
-                    user.is_admin = updated_user.is_admin.unwrap();
-                    user.is_superadmin = updated_user.is_superadmin.unwrap();
+                    user.username = payload.username.clone().or(user.username);
+                    user.firstname = payload.firstname.clone().or(user.firstname);
+                    user.lastname = payload.lastname.clone().or(user.lastname);
+                    user.email = payload.email.clone().or(user.email);
+                    user.password = payload.password.clone().or(user.password);
+                    user.is_active = Option::from(payload.is_active).or(user.is_active);
+                    user.is_admin = Option::from(payload.is_admin).or(user.is_admin);
+                    user.is_superadmin = Option::from(payload.is_superadmin).or(user.is_superadmin);
+                    user.updated_at = Option::from(
+                        NaiveDateTime::new(
+                            NaiveDate::from(Utc::now().naive_utc()),
+                            NaiveTime::from(Utc::now().time()),
+                        )
+                    );
 
                     Ok(HttpResponse::Ok().json(user))
                 }
