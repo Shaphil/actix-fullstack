@@ -6,7 +6,7 @@ use actix_web::{get, patch, post, web, Error, HttpResponse, Responder};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use entity::user::Entity as User;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{ActiveModelTrait, EntityTrait, IntoActiveModel};
+use sea_orm::{ActiveModelTrait, EntityTrait, IntoActiveModel, QueryOrder};
 
 #[post("/create")]
 pub async fn create_user(payload: Json<UserRequest>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
@@ -25,7 +25,11 @@ pub async fn create_user(payload: Json<UserRequest>, app_state: web::Data<AppSta
 
 #[get("")]
 pub async fn get_users(app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
-    let result = User::find().all(&app_state.db).await;
+    let result = User::find()
+        .order_by_asc(entity::user::Column::Id)
+        .all(&app_state.db)
+        .await;
+
     match result {
         Ok(users) => Ok(HttpResponse::Ok().json(users)),
         Err(err) => {
