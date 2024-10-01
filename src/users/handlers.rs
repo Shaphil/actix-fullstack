@@ -5,7 +5,7 @@ use actix_web::web::Json;
 use actix_web::{get, patch, post, web, Error, HttpResponse, Responder};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use entity::user::Entity as User;
-use sea_orm::{ActiveModelTrait, EntityTrait};
+use sea_orm::{ActiveModelTrait, EntityTrait, IntoActiveModel};
 
 #[post("/create")]
 pub async fn create_user(payload: Json<UserRequest>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
@@ -88,7 +88,19 @@ pub async fn update_user(id: web::Path<i32>, payload: Json<UserRequest>, app_sta
                         )
                     );
 
-                    Ok(HttpResponse::Ok().json(user))
+                    println!("LOG: Update User: {:?}", user.clone());
+                    let user_model = user.into_active_model();
+                    println!("LOG: Update User: {:?}", user_model.clone());
+                    // let result = User::update(user_model).exec(&app_state.db).await;
+                    let result = user_model.update(&app_state.db).await;
+
+                    match result {
+                        Ok(response) => Ok(HttpResponse::Ok().json(response)),
+                        Err(err) => {
+                            let response = ApiResponse { message: err.to_string() };
+                            Ok(HttpResponse::BadRequest().json(response))
+                        }
+                    }
                 }
             }
         }
