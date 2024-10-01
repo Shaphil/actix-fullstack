@@ -5,6 +5,7 @@ use actix_web::web::Json;
 use actix_web::{get, patch, post, web, Error, HttpResponse, Responder};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use entity::user::Entity as User;
+use sea_orm::ActiveValue::Set;
 use sea_orm::{ActiveModelTrait, EntityTrait, IntoActiveModel};
 
 #[post("/create")]
@@ -72,28 +73,24 @@ pub async fn update_user(id: web::Path<i32>, payload: Json<UserRequest>, app_sta
                     let response = ApiResponse { message };
                     Ok(HttpResponse::NotFound().json(response))
                 }
-                Some(mut user) => {
-                    user.username = payload.username.clone().or(user.username);
-                    user.firstname = payload.firstname.clone().or(user.firstname);
-                    user.lastname = payload.lastname.clone().or(user.lastname);
-                    user.email = payload.email.clone().or(user.email);
-                    user.password = payload.password.clone().or(user.password);
-                    user.is_active = Option::from(payload.is_active).or(user.is_active);
-                    user.is_admin = Option::from(payload.is_admin).or(user.is_admin);
-                    user.is_superadmin = Option::from(payload.is_superadmin).or(user.is_superadmin);
-                    user.updated_at = Option::from(
+                Some(user_model) => {
+                    let mut user = user_model.into_active_model();
+                    user.username = Set(payload.username.clone().or(user.username.unwrap()));
+                    user.firstname = Set(payload.firstname.clone().or(user.firstname.unwrap()));
+                    user.lastname = Set(payload.lastname.clone().or(user.lastname.unwrap()));
+                    user.email = Set(payload.email.clone().or(user.email.unwrap()));
+                    user.password = Set(payload.password.clone().or(user.password.unwrap()));
+                    user.is_active = Set(Option::from(payload.is_active).or(user.is_active.unwrap()));
+                    user.is_admin = Set(Option::from(payload.is_admin).or(user.is_admin.unwrap()));
+                    user.is_superadmin = Set(Option::from(payload.is_superadmin).or(user.is_superadmin.unwrap()));
+                    user.updated_at = Set(Option::from(
                         NaiveDateTime::new(
                             NaiveDate::from(Utc::now().naive_utc()),
                             NaiveTime::from(Utc::now().time()),
                         )
-                    );
+                    ));
 
-                    println!("LOG: Update User: {:?}", user.clone());
-                    let user_model = user.into_active_model();
-                    println!("LOG: Update User: {:?}", user_model.clone());
-                    // let result = User::update(user_model).exec(&app_state.db).await;
-                    let result = user_model.update(&app_state.db).await;
-
+                    let result = user.update(&app_state.db).await;
                     match result {
                         Ok(response) => Ok(HttpResponse::Ok().json(response)),
                         Err(err) => {
