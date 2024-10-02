@@ -42,11 +42,11 @@ impl MigrationTrait for Migration {
     async fn up(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .alter_table(   // previously this was `.create_table()`
-                            Table::alter()
-                                .table(User::Table)
-                                .add_column_if_not_exists(ColumnDef::new(User::IsAdmin).boolean().default(false))
-                                .add_column_if_not_exists(ColumnDef::new(User::IsSuperadmin).boolean().default(false))
-                                .to_owned(),
+                Table::alter()
+                    .table(User::Table)
+                    .add_column_if_not_exists(ColumnDef::new(User::IsAdmin).boolean().default(false))
+                    .add_column_if_not_exists(ColumnDef::new(User::IsSuperadmin).boolean().default(false))
+                    .to_owned(),
             )
             .await
     }

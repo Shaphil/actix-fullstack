@@ -29,6 +29,7 @@ Let's get started.
 11. [Updating the entity](docs/11_updating_entity.md)
 12. [Adding the users module](docs/12_adding_the_users_module.md)
 13. [Adding Admin fields to User](docs/13_adding_admin_fields_to_user.md)
+14. [The User API](docs/14_the_user_api.md)
 
 ## Running the server
 

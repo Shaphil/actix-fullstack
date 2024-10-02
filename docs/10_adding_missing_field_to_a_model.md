@@ -18,7 +18,7 @@ table, see that your migration has been applied once and **ignore** your command
 We will first look at how we can alter our existing `User` table which is what you should do if you have data in your
 table. Also, this gives you a chance to learn how to write migration for altering a table.
 
-First, crerate a new migration for this purpose,
+First, create a new migration for this purpose,
 
 ```bash
 sea-orm-cli migrate generate alter_user_table_add_password_field
