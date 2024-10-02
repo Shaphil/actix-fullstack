@@ -2,7 +2,7 @@ use crate::users::models::{ApiResponse, UserRequest};
 use crate::users::serializers::UserSerializer;
 use crate::utils::app_state::AppState;
 use actix_web::web::Json;
-use actix_web::{get, patch, post, web, Error, HttpResponse, Responder};
+use actix_web::{get, patch, post, put, web, Error, HttpResponse, Responder};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use entity::user::Entity as User;
 use sea_orm::ActiveValue::Set;
@@ -96,6 +96,54 @@ pub async fn update_user(id: web::Path<i32>, payload: Json<UserRequest>, app_sta
 
                     let result = user.update(&app_state.db).await;
                     match result {
+                        Ok(response) => Ok(HttpResponse::Ok().json(response)),
+                        Err(err) => {
+                            let response = ApiResponse { message: err.to_string() };
+                            Ok(HttpResponse::BadRequest().json(response))
+                        }
+                    }
+                }
+            }
+        }
+        Err(err) => {
+            let response = ApiResponse { message: err.to_string() };
+            Ok(HttpResponse::BadRequest().json(response))
+        }
+    }
+}
+
+#[put("/{id}")]
+pub async fn update_user_full(id: web::Path<i32>, payload: Json<UserRequest>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
+    let user_id = id.into_inner();
+    let result = User::find_by_id(user_id.clone()).one(&app_state.db).await;
+
+    match result {
+        Ok(model) => {
+            match model {
+                None => {
+                    let message = format!("User with ID `{}`, does not exist", user_id.clone());
+                    let response = ApiResponse { message };
+                    Ok(HttpResponse::NotFound().json(response))
+                }
+                Some(user_model) => {
+                    let mut user = user_model.into_active_model();
+                    user.username = Set(payload.username.clone());
+                    user.firstname = Set(payload.firstname.clone());
+                    user.lastname = Set(payload.lastname.clone());
+                    user.email = Set(payload.email.clone());
+                    user.password = Set(payload.password.clone());
+                    user.is_active = Set(payload.is_active.clone());
+                    user.is_admin = Set(payload.is_admin.clone());
+                    user.is_superadmin = Set(payload.is_superadmin.clone());
+                    user.updated_at = Set(Option::from(
+                        NaiveDateTime::new(
+                            NaiveDate::from(Utc::now().date_naive()),
+                            NaiveTime::from(Utc::now().time()),
+                        )
+                    ));
+
+                    let update = user.update(&app_state.db).await;
+                    match update {
                         Ok(response) => Ok(HttpResponse::Ok().json(response)),
                         Err(err) => {
                             let response = ApiResponse { message: err.to_string() };

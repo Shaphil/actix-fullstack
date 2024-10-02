@@ -8,5 +8,6 @@ pub fn routes(config: &mut web::ServiceConfig) {
             .service(handlers::get_users)
             .service(handlers::get_user)
             .service(handlers::update_user)
+            .service(handlers::update_user_full)
     );
 }
