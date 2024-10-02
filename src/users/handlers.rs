@@ -2,7 +2,7 @@ use crate::users::models::{ApiResponse, UserRequest};
 use crate::users::serializers::UserSerializer;
 use crate::utils::app_state::AppState;
 use actix_web::web::Json;
-use actix_web::{get, patch, post, put, web, Error, HttpResponse, Responder};
+use actix_web::{delete, get, patch, post, put, web, Error, HttpResponse, Responder};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use entity::user::Entity as User;
 use sea_orm::ActiveValue::Set;
@@ -145,6 +145,44 @@ pub async fn update_user_full(id: web::Path<i32>, payload: Json<UserRequest>, ap
                     let update = user.update(&app_state.db).await;
                     match update {
                         Ok(response) => Ok(HttpResponse::Ok().json(response)),
+                        Err(err) => {
+                            let response = ApiResponse { message: err.to_string() };
+                            Ok(HttpResponse::BadRequest().json(response))
+                        }
+                    }
+                }
+            }
+        }
+        Err(err) => {
+            let response = ApiResponse { message: err.to_string() };
+            Ok(HttpResponse::BadRequest().json(response))
+        }
+    }
+}
+
+#[delete("/{id}")]
+async fn delete_user(id: web::Path<i32>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
+    let user_id = id.into_inner();
+    let result = User::find_by_id(user_id).one(&app_state.db).await;
+
+    match result {
+        Ok(model) => {
+            match model {
+                None => {
+                    let message = format!("User with ID `{}`, does not exist", user_id.clone());
+                    let response = ApiResponse { message };
+                    Ok(HttpResponse::NotFound().json(response))
+                }
+                Some(user_model) => {
+                    let user = user_model.into_active_model();
+                    let res = user.delete(&app_state.db).await;
+
+                    match res {
+                        Ok(delete_result) => {
+                            let message = format!("Deleted {} user with Id {}", delete_result.rows_affected, user_id.clone());
+                            let response = ApiResponse { message };
+                            Ok(HttpResponse::Ok().json(response))
+                        }
                         Err(err) => {
                             let response = ApiResponse { message: err.to_string() };
                             Ok(HttpResponse::BadRequest().json(response))
