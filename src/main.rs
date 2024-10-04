@@ -23,7 +23,7 @@ async fn main() -> std::io::Result<()> {
     Migrator::up(&db, None).await.unwrap();
 
     let (host, port) = get_address();
-    println!("Server running at http://{}:{}", host, port);
+    log::info!("Server running at http://{}:{}", host, port);
 
     HttpServer::new(move || {
         App::new()
