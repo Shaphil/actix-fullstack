@@ -1,15 +1,17 @@
 use crate::users::models::{ApiResponse, UserRequest};
+use crate::users::pagination::{Pagination, PaginationQuery};
 use crate::users::serializers::UserSerializer;
 use crate::utils::app_state::AppState;
-use actix_web::web::Json;
-use actix_web::{delete, get, patch, post, put, web, Error, HttpResponse, Responder};
+use actix_web::web::{Data, Json, Path, Query};
+use actix_web::{delete, get, patch, post, put, Error, HttpResponse, Responder};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use entity::user::Entity as User;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{ActiveModelTrait, EntityTrait, IntoActiveModel, QueryOrder};
+use sea_orm::{ActiveModelTrait, EntityTrait, IntoActiveModel};
+
 
 #[post("/create")]
-pub async fn create_user(payload: Json<UserRequest>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
+pub async fn create_user(payload: Json<UserRequest>, app_state: Data<AppState>) -> Result<impl Responder, Error> {
     let serializer = UserSerializer { data: payload };
     let user = serializer.serialize();
 
@@ -23,15 +25,18 @@ pub async fn create_user(payload: Json<UserRequest>, app_state: web::Data<AppSta
     }
 }
 
-#[get("")]
-pub async fn get_users(app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
-    let result = User::find()
-        .order_by_asc(entity::user::Column::Id)
-        .all(&app_state.db)
-        .await;
 
-    match result {
-        Ok(users) => Ok(HttpResponse::Ok().json(users)),
+#[get("")]
+pub async fn get_users(query: Query<PaginationQuery>, app_state: Data<AppState>) -> Result<impl Responder, Error> {
+    let page = Pagination { query: query.clone() };
+    let user_pages = page.paginate();
+
+    let pages = user_pages.all(&app_state.db).await;
+    match pages {
+        Ok(users) => {
+            let result = page.response(users);
+            Ok(HttpResponse::Ok().json(result))
+        }
         Err(err) => {
             let response = ApiResponse { message: err.to_string() };
             Ok(HttpResponse::BadRequest().json(response))
@@ -40,7 +45,7 @@ pub async fn get_users(app_state: web::Data<AppState>) -> Result<impl Responder,
 }
 
 #[get("/{id}")]
-pub async fn get_user(id: web::Path<i32>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
+pub async fn get_user(id: Path<i32>, app_state: Data<AppState>) -> Result<impl Responder, Error> {
     let user_id = id.into_inner();
     let result = User::find_by_id(user_id.clone())
         .one(&app_state.db)
@@ -65,7 +70,7 @@ pub async fn get_user(id: web::Path<i32>, app_state: web::Data<AppState>) -> Res
 }
 
 #[patch("/{id}")]
-pub async fn update_user(id: web::Path<i32>, payload: Json<UserRequest>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
+pub async fn update_user(id: Path<i32>, payload: Json<UserRequest>, app_state: Data<AppState>) -> Result<impl Responder, Error> {
     let user_id = id.into_inner();
     let result = User::find_by_id(user_id.clone()).one(&app_state.db).await;
 
@@ -113,7 +118,7 @@ pub async fn update_user(id: web::Path<i32>, payload: Json<UserRequest>, app_sta
 }
 
 #[put("/{id}")]
-pub async fn update_user_full(id: web::Path<i32>, payload: Json<UserRequest>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
+pub async fn update_user_full(id: Path<i32>, payload: Json<UserRequest>, app_state: Data<AppState>) -> Result<impl Responder, Error> {
     let user_id = id.into_inner();
     let result = User::find_by_id(user_id.clone()).one(&app_state.db).await;
 
@@ -161,7 +166,7 @@ pub async fn update_user_full(id: web::Path<i32>, payload: Json<UserRequest>, ap
 }
 
 #[delete("/{id}")]
-async fn delete_user(id: web::Path<i32>, app_state: web::Data<AppState>) -> Result<impl Responder, Error> {
+async fn delete_user(id: Path<i32>, app_state: Data<AppState>) -> Result<impl Responder, Error> {
     let user_id = id.into_inner();
     let result = User::find_by_id(user_id).one(&app_state.db).await;
 
