@@ -8,7 +8,12 @@ lazy_static! {
     pub static ref HOST: String = set_host();
     pub static ref PORT: u16 = set_port();
     pub static ref DATABASE_URL: String = set_db();
+    pub static ref SECRET: String = set_secret();
 }
+
+// application defaults
+const _HOST: &str = "127.0.0.1";
+const _PORT: u16 = 8080;
 
 fn get_env(key: &str) -> Result<String, VarError> {
     dotenv::dotenv().ok();
@@ -16,11 +21,17 @@ fn get_env(key: &str) -> Result<String, VarError> {
 }
 
 fn set_host() -> String {
-    get_env("HOST").unwrap()
+    let host = get_env("HOST").unwrap_or(_HOST.to_string());
+    if host != _HOST { _HOST.to_string() } else { host }
 }
 
 fn set_port() -> u16 {
-    get_env("PORT").unwrap().parse::<u16>().unwrap()
+    // if env variable `PORT` doesn't exist, we set `port` to the value of `_PORT`
+    // which holds the value `8080` of type `u16`
+    let port = get_env("PORT").unwrap_or(_PORT.to_string());
+    // if the environment variable `PORT` exists but contains garbage value or
+    // a value that cannot be parsed as `u16`, we provide the default value `_PORT` again
+    port.parse::<u16>().unwrap_or(_PORT)
 }
 
 pub fn get_address() -> (String, u16) {
@@ -45,4 +56,12 @@ pub async fn get_db_connection() -> DatabaseConnection {
         .sqlx_logging_level(log::LevelFilter::Info);
 
     Database::connect(opt).await.unwrap()
+}
+
+fn set_secret() -> String {
+    get_env("SECRET").unwrap()
+}
+
+pub fn get_secret() -> String {
+    (*SECRET).clone()
 }
