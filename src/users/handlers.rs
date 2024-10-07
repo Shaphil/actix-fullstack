@@ -2,13 +2,15 @@ use crate::users::models::{ApiResponse, UserRequest};
 use crate::users::pagination::{Pagination, PaginationQuery};
 use crate::users::serializers::UserSerializer;
 use crate::utils::app_state::AppState;
+use crate::utils::auth::JSONWebToken;
+use crate::utils::config::get_secret;
 use actix_web::web::{Data, Json, Path, Query};
 use actix_web::{delete, get, patch, post, put, Error, HttpResponse, Responder};
 use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Utc};
+use entity::user::Column;
 use entity::user::Entity as User;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{ActiveModelTrait, EntityTrait, IntoActiveModel};
-
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
 
 #[post("/create")]
 pub async fn create_user(payload: Json<UserRequest>, app_state: Data<AppState>) -> Result<impl Responder, Error> {
@@ -21,6 +23,37 @@ pub async fn create_user(payload: Json<UserRequest>, app_state: Data<AppState>) 
         Err(err) => {
             let response = ApiResponse { message: err.to_string() };
             Ok(HttpResponse::BadRequest().json(response))
+        }
+    }
+}
+
+#[post("/login")]
+pub async fn login(payload: Json<UserRequest>, app_state: Data<AppState>) -> Result<impl Responder, Error> {
+    let result = User::find()
+        .filter(Column::Username.eq(&payload.username.clone().unwrap()))
+        .filter(Column::Password.eq(&payload.password.clone().unwrap()))
+        .one(&app_state.db)
+        .await;
+
+    match result {
+        Ok(user_option) => {
+            match user_option {
+                None => {
+                    let response = ApiResponse { message: format!("User '{}' not found", &payload.username.clone().unwrap()) };
+                    Ok(HttpResponse::NotFound().json(response))
+                }
+                Some(user) => {
+                    let jwt = JSONWebToken { secret: get_secret() };
+                    let token = jwt.encode(user.id, user.email.unwrap());
+                    // TODO: this should be of type LoginResponse, not ApiResponse
+                    let response = ApiResponse { message: token };
+                    Ok(HttpResponse::Ok().json(response))
+                }
+            }
+        }
+        Err(err) => {
+            let response = ApiResponse { message: err.to_string() };
+            Ok(HttpResponse::InternalServerError().json(response))
         }
     }
 }
