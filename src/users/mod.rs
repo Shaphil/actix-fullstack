@@ -6,3 +6,4 @@ mod pagination;
 // public modules
 pub mod handlers;
 pub mod urls;
+pub mod middlewares;
