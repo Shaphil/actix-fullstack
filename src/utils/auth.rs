@@ -5,10 +5,10 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
-    exp: i64,
-    iat: i64,
-    id: i32,
-    email: String,
+    pub(crate) exp: i64,
+    pub(crate) iat: i64,
+    pub(crate) id: i32,
+    pub(crate) email: String,
 }
 
 pub struct JSONWebToken {
@@ -16,7 +16,7 @@ pub struct JSONWebToken {
 }
 
 impl JSONWebToken {
-    pub fn decode(&self, jwt: &String) -> Result<TokenData<Claims>, Error> {
+    pub fn decode(&self, jwt: String) -> Result<TokenData<Claims>, Error> {
         let token_data: Result<TokenData<Claims>, Error> = decode::<Claims>(
             &jwt,
             &DecodingKey::from_secret(self.secret.as_bytes()),
@@ -53,7 +53,3 @@ impl JSONWebToken {
         token
     }
 }
-
-
-
-
