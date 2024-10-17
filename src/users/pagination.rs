@@ -30,10 +30,11 @@ impl Pagination {
         user_pages
     }
 
-    pub fn response(&self, users: Vec<Model>) -> Value {
+    pub fn response(&self, users: Vec<Model>, total: u64) -> Value {
         let page = self.query.page.unwrap_or(1);
         json!({
             "page": page,
+            "total": total,
             "users": users
         })
     }

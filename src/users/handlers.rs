@@ -10,7 +10,7 @@ use chrono::{NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use entity::user::Column;
 use entity::user::Entity as User;
 use sea_orm::ActiveValue::Set;
-use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, QueryFilter};
+use sea_orm::{ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel, PaginatorTrait, QueryFilter};
 
 #[post("/create")]
 pub async fn create_user(payload: Json<UserRequest>, app_state: Data<AppState>) -> Result<impl Responder, Error> {
@@ -63,11 +63,12 @@ pub async fn login(payload: Json<UserRequest>, app_state: Data<AppState>) -> Res
 pub async fn get_users(query: Query<PaginationQuery>, app_state: Data<AppState>) -> Result<impl Responder, Error> {
     let page = Pagination { query: query.clone() };
     let user_pages = page.paginate();
+    let total = user_pages.clone().count(&app_state.db).await.unwrap_or_else(|_| 0);
 
     let pages = user_pages.all(&app_state.db).await;
     match pages {
         Ok(users) => {
-            let result = page.response(users);
+            let result = page.response(users, total);
             Ok(HttpResponse::Ok().json(result))
         }
         Err(err) => {
