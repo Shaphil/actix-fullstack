@@ -6,7 +6,7 @@ use actix_web::dev::{ServiceRequest, ServiceResponse};
 use actix_web::error::{Error, ErrorInternalServerError};
 use actix_web::http::header::AUTHORIZATION;
 use actix_web::middleware::Next;
-use actix_web::{HttpMessage, HttpResponse};
+use actix_web::HttpMessage;
 use serde_json::json;
 
 pub async fn authenticate(request: ServiceRequest, next: Next<impl MessageBody>) -> Result<ServiceResponse<impl MessageBody>, Error> {
