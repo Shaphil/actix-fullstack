@@ -43,11 +43,10 @@ pub async fn authenticate(request: ServiceRequest, next: Next<impl MessageBody>)
 }
 
 
-
 #[derive(Debug)]
 pub enum AuthenticationError {
     MissingToken,
-    InvalidTokenFormat(std::fmt::Error),
+    InvalidTokenFormat(fmt::Error),
     InvalidToken(jsonwebtoken::errors::Error),
 }
 
