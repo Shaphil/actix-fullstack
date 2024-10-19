@@ -30,25 +30,16 @@ impl JSONWebToken {
         let now = Utc::now();
         let expiry = Duration::days(1);
 
-        let my_claims = Claims {
+        let claims = Claims {
             exp: (now + expiry).timestamp(),
             iat: now.timestamp(),
             id,
             email,
         };
 
-        let header = Header {
-            kid: Some(self.secret.to_owned()),
-            alg: Algorithm::HS512,
-            ..Default::default()
-        };
-
+        let header = Header::new(Algorithm::HS512);
         let encoding_key = EncodingKey::from_secret(self.secret.as_bytes());
-
-        let token = match encode(&header, &my_claims, &encoding_key) {
-            Ok(_token) => _token,
-            Err(_) => panic!(), // in practice, you would return the error
-        };
+        let token = encode(&header, &claims, &encoding_key).unwrap_or_else(|err| err.to_string());
 
         token
     }
