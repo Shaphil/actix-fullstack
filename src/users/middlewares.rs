@@ -1,13 +1,12 @@
 use crate::users::models::ApiResponse;
-use crate::utils::auth::{Claims, JSONWebToken};
+use crate::utils::auth::JSONWebToken;
 use crate::utils::config::get_secret;
 use actix_web::body::MessageBody;
 use actix_web::dev::{ServiceRequest, ServiceResponse};
-use actix_web::error::{Error, ErrorInternalServerError};
+use actix_web::error::Error;
 use actix_web::http::header::AUTHORIZATION;
 use actix_web::middleware::Next;
 use actix_web::{HttpMessage, HttpResponse, ResponseError};
-use serde_json::json;
 use std::fmt;
 
 pub async fn authenticate(request: ServiceRequest, next: Next<impl MessageBody>) -> Result<ServiceResponse<impl MessageBody>, Error> {
@@ -24,13 +23,7 @@ pub async fn authenticate(request: ServiceRequest, next: Next<impl MessageBody>)
 
             match jwt.decode(token) {
                 Ok(data) => {
-                    let claims_info = Claims {
-                        exp: data.claims.exp,
-                        iat: data.claims.iat,
-                        id: data.claims.id,
-                        email: data.claims.email,
-                    };
-                    request.extensions_mut().insert(claims_info);
+                    request.extensions_mut().insert(data.claims);
                     next.call(request).await
                 }
                 Err(err) => {
