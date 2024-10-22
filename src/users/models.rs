@@ -7,6 +7,18 @@ pub struct ApiResponse {
     pub message: String,
 }
 
+#[derive(Serialize)]
+pub struct LoginResponse {
+    pub token: String,
+    pub refresh_token: String,
+}
+
+// TODO: move to `auth` module
+#[derive(Serialize, Deserialize)]
+pub struct RefreshToken {
+    pub token: String,
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserRequest {
     pub username: Option<String>,
