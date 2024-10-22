@@ -32,9 +32,22 @@ impl Pagination {
 
     pub fn response(&self, users: Vec<Model>, total: u64) -> Value {
         let page = self.query.page.unwrap_or(1);
+
+        let mut next = String::new();
+        if page + 1 < total {
+            next = format!("page={}&page_size={}", page + 1, self.query.page_size.unwrap_or(0));
+        }
+
+        let mut prev = String::new();
+        if page - 1 > 0 {
+            prev = format!("page={}&page_size={}", page - 1, self.query.page_size.unwrap_or(0));
+        }
+
         json!({
             "page": page,
             "total": total,
+            "prev": prev,
+            "next": next,
             "users": users
         })
     }
