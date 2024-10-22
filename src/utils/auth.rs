@@ -15,6 +15,12 @@ pub struct JSONWebToken {
     pub(crate) secret: String,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct Token {
+    pub token: String,
+    pub refresh_token: String,
+}
+
 impl JSONWebToken {
     pub fn decode(&self, jwt: String) -> Result<TokenData<Claims>, Error> {
         let token_data: Result<TokenData<Claims>, Error> = decode::<Claims>(
@@ -26,11 +32,11 @@ impl JSONWebToken {
         token_data
     }
 
-    pub fn encode(&self, id: i32, email: String) -> String {
+    pub fn encode(&self, id: i32, email: String) -> Token {
         let now = Utc::now();
-        let expiry = Duration::days(1);
+        let expiry = Duration::hours(1);
 
-        let claims = Claims {
+        let mut claims = Claims {
             exp: (now + expiry).timestamp(),
             iat: now.timestamp(),
             id,
@@ -41,6 +47,10 @@ impl JSONWebToken {
         let encoding_key = EncodingKey::from_secret(self.secret.as_bytes());
         let token = encode(&header, &claims, &encoding_key).unwrap_or_else(|err| err.to_string());
 
-        token
+        let refresh_expiry = Duration::days(7);
+        claims.exp = (now + refresh_expiry).timestamp();
+        let refresh_token = encode(&header, &claims, &encoding_key).unwrap_or_else(|err| err.to_string());
+
+        Token { token, refresh_token }
     }
 }
