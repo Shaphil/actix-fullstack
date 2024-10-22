@@ -1,4 +1,4 @@
-use crate::users::models::{ApiResponse, UserRequest};
+use crate::users::models::{ApiResponse, LoginResponse, RefreshToken, UserRequest};
 use crate::users::pagination::{Pagination, PaginationQuery};
 use crate::users::serializers::UserSerializer;
 use crate::utils::app_state::AppState;
@@ -44,9 +44,12 @@ pub async fn login(payload: Json<UserRequest>, app_state: Data<AppState>) -> Res
                 }
                 Some(user) => {
                     let jwt = JSONWebToken { secret: get_secret() };
-                    let token = jwt.encode(user.id, user.email.unwrap());
+                    let tokens = jwt.encode(user.id, user.email.unwrap());
                     // TODO: this should be of type LoginResponse, not ApiResponse
-                    let response = ApiResponse { message: token };
+                    let response = LoginResponse {
+                        token: tokens.token,
+                        refresh_token: tokens.refresh_token,
+                    };
                     Ok(HttpResponse::Ok().json(response))
                 }
             }
@@ -229,6 +232,25 @@ async fn delete_user(id: Path<i32>, app_state: Data<AppState>) -> Result<impl Re
                     }
                 }
             }
+        }
+        Err(err) => {
+            let response = ApiResponse { message: err.to_string() };
+            Ok(HttpResponse::BadRequest().json(response))
+        }
+    }
+}
+
+// TODO: move to `auth` module
+#[post("/refresh")]
+async fn refresh_jwt(payload: Json<RefreshToken>) -> Result<impl Responder, Error> {
+    let token = payload.token.clone();
+    let jwt = JSONWebToken { secret: get_secret() };
+    match jwt.decode(token) {
+        Ok(data) => {
+            let id = data.claims.id;
+            let email = data.claims.email;
+            let tokens = jwt.encode(id, email);
+            Ok(HttpResponse::Ok().json(tokens))
         }
         Err(err) => {
             let response = ApiResponse { message: err.to_string() };
