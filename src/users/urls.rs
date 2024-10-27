@@ -1,7 +1,7 @@
 use actix_web::middleware::from_fn;
 use actix_web::web;
 use crate::users::handlers;
-use crate::users::middlewares::authenticate;
+use crate::auth::middlewares::authenticate;
 
 pub fn routes(config: &mut web::ServiceConfig) {
     config
@@ -18,7 +18,5 @@ pub fn routes(config: &mut web::ServiceConfig) {
                 .service(handlers::get_users)
                 .service(handlers::get_user)
                 .service(handlers::login)
-                // TODO: move to `auth` module
-                .service(handlers::refresh_jwt)
         );
 }
