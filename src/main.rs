@@ -1,6 +1,7 @@
 mod home;
 mod users;
 mod utils;
+mod auth;
 
 use actix_web::middleware::Logger;
 use actix_web::{web, App, HttpServer};
@@ -31,6 +32,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .configure(home::urls::routes)
             .configure(users::urls::routes)
+            .configure(auth::urls::routes)
     })
         .bind((host, port))?
         .run()
