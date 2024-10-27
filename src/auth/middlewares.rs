@@ -1,4 +1,4 @@
-use crate::users::models::ApiResponse;
+use crate::utils::response::ApiResponse;
 use crate::utils::auth::JSONWebToken;
 use crate::utils::config::get_secret;
 use actix_web::body::MessageBody;
