@@ -16,6 +16,7 @@ pub struct Pagination {
 
 impl Pagination {
     pub fn paginate(&self) -> Select<Entity> {
+        // TODO: check if `self.query.page_size` contains any data
         let page_size = self.query.page_size.unwrap_or(5);
         let page = self.query.page.unwrap_or(1);
         let offset = page * page_size;
@@ -33,6 +34,7 @@ impl Pagination {
     pub fn response(&self, users: Vec<Model>, total: u64) -> Value {
         let page = self.query.page.unwrap_or(1);
 
+        // TODO: fix logic
         let mut next = String::new();
         if page + 1 < total {
             next = format!("page={}&page_size={}", page + 1, self.query.page_size.unwrap_or(0));
