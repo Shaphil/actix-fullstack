@@ -33,8 +33,9 @@ impl Pagination {
 
     pub fn response(&self, users: Vec<Model>, total: u64) -> Value {
         let page = self.query.page.unwrap_or(1);
-        let page_size = self.query.page_size.unwrap_or(5);
-        let pages = total / page_size;
+        let per_page = self.query.page_size.unwrap_or(5);
+        let pages = total / per_page;
+        let page_size = users.len();
 
         // TODO: fix logic
         let mut next = String::new();
@@ -50,6 +51,7 @@ impl Pagination {
         json!({
             "page": page,
             "total": total,
+            "page_size": page_size,
             "prev": prev,
             "next": next,
             "users": users
