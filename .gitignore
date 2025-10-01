@@ -21,3 +21,8 @@ Cargo.lock
 .code/**
 
 .env
+
+### SQLite
+*.db
+*.sqlite
+*.sqlite3
