@@ -16,6 +16,11 @@ jsonwebtoken = "9.3.0"
 lazy_static = "1.5.0"
 log = "0.4.22"
 migration = { path = "migration" }
-sea-orm = { version = "1.0.1", features = ["sqlx-postgres", "runtime-tokio-rustls", "macros"] }
+sea-orm = { version = "1.0.1", features = [
+    "sqlx-sqlite",
+    "sqlx-postgres",
+    "runtime-tokio-rustls",
+    "macros"
+] }
 serde = { version = "1.0.208", features = ["derive"] }
 serde_json = { version = "1.0.125", features = ["preserve_order"] }
